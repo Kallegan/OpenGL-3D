@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <vector>
 
 void processInput(GLFWwindow* window)
 {
@@ -124,8 +125,6 @@ int main()
 	int width = 640;
 	int height = 480;
 
-	
-
 	GLFWwindow* window = InitWindow(width, height);	
 	if (!window)
 	{
@@ -134,8 +133,54 @@ int main()
 	}
 	
 	unsigned int shader = createShader();
-	//set shader as active.
 	glUseProgram(shader);
+
+	
+	/* 
+	X, Y, Z | R, G, B 
+	0 = centered.
+	X = -0.25f a bit to the left, 0.25f right. 
+	Y = positive up, negative down.
+	Z = 0, middle of screen dept.
+
+	R G B, (0 to 1) 1, 0 ,0 colors vertex completly red etc.
+	*/
+
+	std::vector<float> vertices =  //using normalized device coordinates.
+	{ 
+    /*stride:   1       2     3     4     5     6     each colm = colm * sizeof(float) */
+		     -0.25f, -0.25f, 0.0f, 1.0f, 0.0f, 0.0f,  //vertice 1
+		      0.25f, -0.25f, 0.0f, 0.0f, 1.0f, 0.0f,  //vertice 2
+		     -0.0f,   0.25f, 0.0f, 0.0f, 0.0f, 1.0f   //vertice 3
+	};
+	int vertexCount = 3;
+	int VBOSize = vertices.size() * sizeof(float); //how many bits to allocate in dynamic storage.
+	int stride = 6 * sizeof(float); //how many elements to get from one vertex to another in vector.
+
+	//vertex buffer object, used as a set of data for the vertices.
+	unsigned int VBO;
+	glCreateBuffers(1, &VBO);
+
+	//(GL_DYNAMIC_STORAGE_BIT)allocates this amount of storage so we can change it later if needed.
+	//vertices.data() gives adress to first element in vector.
+	glNamedBufferStorage(VBO, VBOSize, vertices.data(), GL_DYNAMIC_STORAGE_BIT);
+
+	//stores set of data and the instructions what the data represent. ex. what's vertices coordinates, RGB etc.
+	unsigned int VAO;
+	glCreateVertexArrays(1, &VAO);
+	//binds vertex array to vertex buffer.
+	glVertexArrayVertexBuffer(VAO, 0, VBO, 0, stride);
+
+	//attribute pointers to give more info to OpenGL what the data means and where/how to access it.
+	glEnableVertexArrayAttrib(VAO, 0);
+	glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0); //0 since positions are in the start of vertex vector.
+	glVertexArrayAttribBinding(VAO, 0, 0);
+
+	glEnableVertexArrayAttrib(VAO, 1);
+	glVertexArrayAttribFormat(VAO, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)); //3 floats behind first index.
+	glVertexArrayAttribBinding(VAO, 1, 0);
+
+
 
 	while (!glfwWindowShouldClose(window))
 	{	
@@ -144,12 +189,21 @@ int main()
 
 		//flushes queue events.
 		glfwPollEvents();
+
+		//draw
+		glClearColor(0.5f, 0.2f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUseProgram(shader);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 	
 		//swaps buffer to avoid tearing / sync issues that happens when displaying while drawing.
 		glfwSwapBuffers(window);
 
 	}
 
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
 	glDeleteProgram(shader);
 	glfwTerminate();	
 	return 0;	
