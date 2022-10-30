@@ -130,7 +130,7 @@ int main()
 {	
 	int width = 640;
 	int height = 480;
-	float aspectRatio = (float)height / (float)width;
+	float aspectRatio = (float)width / (float)height;
 
 	GLFWwindow* window = InitWindow(width, height);	
 	if (!window)
@@ -272,7 +272,7 @@ int main()
 	//setup perspective transform for the shader.
 	glm::mat4 projectionTransform = glm::perspective(45.0f, aspectRatio, 0.1f, 10.0f);
 	//4floatvector matrix,sends projection data to shader.
-	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, false, glm::value_ptr(projectionTransform));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projectionTransform));
 
 	while (!glfwWindowShouldClose(window))
 	{	
@@ -286,7 +286,7 @@ int main()
 		float angle = glm::radians(static_cast<float>(10 * glfwGetTime()));
 		glm::mat4 modelTransform = glm::mat4(1.0f);
 		modelTransform = glm::translate(modelTransform, { 0.0f, 0.0f, -3.0f });
-		modelTransform = glm::rotate(modelTransform, 2.0f * angle, { 1.0f, 1.0f, 0.0f });
+		modelTransform = glm::rotate(modelTransform, angle, { 1.0f, 1.0f, 0.0f });
 		modelTransform = glm::rotate(modelTransform, 1.0f * angle, { 0.0f, 1.0f, 0.0f });
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, false, glm::value_ptr(modelTransform));
 
