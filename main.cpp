@@ -3,6 +3,9 @@
 #include <iostream>
 #include <vector>
 #include "stb_image.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 void processInput(GLFWwindow* window)
 {
@@ -46,37 +49,32 @@ unsigned int createShader()
 {
 
 	/*  vertexPositions, 3d vector(x, y, z), coordiates of the vertesies.
-		vertexColor, 3d vector(rgb), telling shader what colors the vertesies has.
-		fragmentColor, -||-, information for fragment shader.
 		gl_Positions, global 4d vector, gets passed vertexPositions. 4th vector(w) is perspective.
-		use main() to pass data. pos to global and fragmentcolor to vertex shader. fragment shader doesn't know pos.
+		uniform mat4, XYZ + 1. Last dimension used for translations. 
+		transform our position to world cooardinates * projection to project the world around us.
 		x, 1.0 - y flips the texture.
 		 "\0" ends string.
 	*/
 
 	const char* vertexShaderSource = "#version 450 core\n"
 		"layout (location = 0) in vec3 vertexPosition;\n"
-		"layout (location = 1) in vec3 vertexColor;\n"
-		"layout (location = 2) in vec2 vertexTexCoords;"
-		"layout (location = 0) out vec3 fragmentColor;\n"
-		"layout (location = 1) out vec2 fragmentTexCoords;"
+		"layout (location = 1) in vec2 vertexTexCoords;\n"		
+		"layout (location = 0) out vec2 fragmentTexCoords;\n"
+		"uniform mat4 model;\n"
+		"uniform mat4 projection;\n"
 		"void main()\n"
 		"{\n"
-		"    gl_Position = vec4(vertexPosition, 1.0);\n"
-		"    fragmentColor = vertexColor;\n"
+		"    gl_Position = projection * model * vec4(vertexPosition, 1.0);\n"
 		"    fragmentTexCoords = vec2(vertexTexCoords.x, 1.0 - vertexTexCoords.y);\n"
 		"}\0";
 
-	//finalColor, 4d vector that adds another float at the end used for alpha.
-	//multiply to color the texture.
 	const char* fragmentShaderSource = "#version 450 core\n"
-		"layout (location = 0) in vec3 fragmentColor;\n"
-		"layout (location = 1) in vec2 fragmentTexCoords;\n"
+		"layout (location = 0) in vec2 fragmentTexCoords;\n"
 		"uniform sampler2D basicTexture;\n"
 		"out vec4 finalColor;\n"
 		"void main()\n"
 		"{\n"
-		"    finalColor = vec4(fragmentColor, 1.0) * texture(basicTexture, fragmentTexCoords);\n"
+		"    finalColor = texture(basicTexture, fragmentTexCoords);\n"
 		"}\0";
 
 	//stores index of the created memory allocation for the shaders.
@@ -132,6 +130,7 @@ int main()
 {	
 	int width = 640;
 	int height = 480;
+	float aspectRatio = (float)height / (float)width;
 
 	GLFWwindow* window = InitWindow(width, height);	
 	if (!window)
@@ -152,18 +151,76 @@ int main()
 	Z = 0, middle of screen dept.
 
 	R G B, (0 to 1) (1, 0, 0) colors vertex completly red etc.
-	*/
+	
 
 	std::vector<float> vertices =  //using normalized device coordinates.
 	{ 
-    /*stride: 1.X     2.Y    3.Z   4.R   5.G   6.B	 7.S   8.T	 each colm = colm * sizeof(float) */
+    //stride: 1.X     2.Y    3.Z   4.R   5.G   6.B	 7.S   8.T	 each colm = colm * sizeof(float) 
 		     -0.25f, -0.25f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,	 //vertice 1
 		      0.25f, -0.25f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,	//vertice 2
 		      0.0f,   0.25f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f	   //vertice 3
 	};
-	int vertexCount = 3;
+	int vertexCount = vertices.size()/8;
 	int VBOSize = vertices.size() * sizeof(float); //how many bits to allocate in dynamic storage.
 	int stride = 8 * sizeof(float); //how many elements to get from one vertex to another in vector.
+	*/
+
+
+
+	//Make Cube
+	//x,y,z,s,t
+	std::vector<float> vertices = { {
+			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom
+			 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+
+			 0.5f,  0.5f, -0.5f, 1.0f, 1,0.f
+			-0.5f,  0.5f, -0.5f, 0.0f, 1,0.f
+			-0.5f, -0.5f, -0.5f, 0.0f, 0,0.f
+
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, //top
+			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+
+			 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, //left
+			-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, //right
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+			 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //back
+			 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+
+			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, //front
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f
+	} };
+	int vertexCount = vertices.size() / 5;
+	int VBOSize = vertices.size() * sizeof(float); //how many bits to allocate in dynamic storage.
+	int stride = 5 * sizeof(float); //how many elements to get from one vertex to another in vector.
 
 	//vertex buffer object, used as a set of data for the vertices.
 	unsigned int VBO;
@@ -186,15 +243,10 @@ int main()
 	glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0); //0 since positions are in the start of vertex vector.
 	glVertexArrayAttribBinding(VAO, 0, 0);
 
-	//color
-	glEnableVertexArrayAttrib(VAO, 1);
-	glVertexArrayAttribFormat(VAO, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)); //3 floats behind first index.
+	//texture coordinate    location in shader
+	glEnableVertexArrayAttrib(VAO, 1);					// floats behind first index(rgb).
+	glVertexArrayAttribFormat(VAO, 1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
 	glVertexArrayAttribBinding(VAO, 1, 0);
-
-	//texture coordinate
-	glEnableVertexArrayAttrib(VAO, 2);
-	glVertexArrayAttribFormat(VAO, 2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float)); //3 floats behind first index.
-	glVertexArrayAttribBinding(VAO, 2, 0);
 
 	//allocating texture 0 to the texture.
 	glUniform1i(glGetUniformLocation(shader, "basicTexture"),0);
@@ -209,11 +261,18 @@ int main()
 	glTextureSubImage2D(texture, 0, 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT); //if out of bound, repeate texture.
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT); 
-	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //if texture is far away, shrink using nearest.
+	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); //if texture is far away, shrink using nearest.
 	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //if texture is far away, grow using linear.
 	stbi_image_free(data); //free the data after setting all up.
 
 
+	//setup frambuffer
+	glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //what color to clear screen with.
+	glEnable(GL_DEPTH_TEST);
+	//setup perspective transform for the shader.
+	glm::mat4 projectionTransform = glm::perspective(45.0f, aspectRatio, 0.1f, 10.0f);
+	//4floatvector matrix,sends projection data to shader.
+	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, false, glm::value_ptr(projectionTransform));
 
 	while (!glfwWindowShouldClose(window))
 	{	
@@ -223,9 +282,17 @@ int main()
 		//flushes queue events.
 		glfwPollEvents();
 
-		//draw
-		glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //clear screen.
-		glClear(GL_COLOR_BUFFER_BIT); //clear buffer.
+		//update transform
+		float angle = glm::radians(static_cast<float>(10 * glfwGetTime()));
+		glm::mat4 modelTransform = glm::mat4(1.0f);
+		modelTransform = glm::translate(modelTransform, { 0.0f, 0.0f, -3.0f });
+		modelTransform = glm::rotate(modelTransform, 2.0f * angle, { 1.0f, 1.0f, 0.0f });
+		modelTransform = glm::rotate(modelTransform, 1.0f * angle, { 0.0f, 1.0f, 0.0f });
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, false, glm::value_ptr(modelTransform));
+
+
+		//draw		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear buffer.
 		glUseProgram(shader); //setup shader program.
 
 		//binds to texture unit declared above with loaded texture.
