@@ -1,16 +1,12 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include <vector>
-#include "stb_image.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "config.h"
+#include "view/shader.h"
+#include "model/Cube.h"
+#include "model/player.h"
 
-
-void processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& playerEulers, int halfWidht, int halfHeight)
+void processInput(GLFWwindow* window, Player* player, int halfWidht, int halfHeight)
 {
 	int wasdState{ 0 };
-	float walkDirection{ playerEulers.z };
+	float walkDirection{ player->eulers.z};
 	bool bWalking{ false };
 	float moveSpeed = 0.1f;
 	
@@ -79,7 +75,7 @@ void processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& play
 	//player movement
 	if (bWalking)
 	{
-		playerPosition += moveSpeed * glm::vec3
+		player->position += moveSpeed * glm::vec3
 		{
 			glm::cos(glm::radians(walkDirection)),
 			glm::sin(glm::radians(walkDirection)),
@@ -96,12 +92,12 @@ void processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& play
 
 	//horizontal rotation
 	float deltaX{ static_cast<float>(mouseX - halfWidht) };
-	playerEulers.z -= deltaX * mouseSpeed;
+	player->eulers.z -= deltaX * mouseSpeed;
 
 	//vertical rotation
 	float deltaY{ static_cast<float>(mouseY - halfHeight) };
 	//sets y rotation to clamp up / down based on look angle.
-	playerEulers.y = std::max(std::min(playerEulers.y + deltaY * mouseSpeed, 179.0f), 1.0f);
+	player->eulers.y = std::max(std::min(player->eulers.y + deltaY * mouseSpeed, 179.0f), 1.0f);
 }
 
 GLFWwindow* InitWindow(int width, int height)
@@ -136,91 +132,25 @@ GLFWwindow* InitWindow(int width, int height)
 	return window;
 }
 
-unsigned int createShader() 
-{
-
-	/*  vertexPositions, 3d vector(x, y, z), coordiates of the vertesies.
-		gl_Positions, global 4d vector, gets passed vertexPositions. 4th vector(w) is perspective.
-		uniform mat4, XYZ + 1. Last dimension used for translations. 
-		x, 1.0 - y flips the texture.
-		 "\0" ends string.
-	*/
-
-	const char* vertexShaderSource = "#version 450 core\n"
-		"layout (location = 0) in vec3 vertexPosition;\n"
-		"layout (location = 1) in vec2 vertexTexCoords;\n"		
-		"layout (location = 0) out vec2 fragmentTexCoords;\n"
-		"uniform mat4 model;\n"
-		"uniform mat4 view;\n"
-		"uniform mat4 projection;\n"
-		"void main()\n"
-		"{\n"
-		"    gl_Position = projection * view * model * vec4(vertexPosition, 1.0);\n"
-		"    fragmentTexCoords = vec2(vertexTexCoords.x, 1.0 - vertexTexCoords.y);\n"
-		"}\0";
-
-	const char* fragmentShaderSource = "#version 450 core\n"
-		"layout (location = 0) in vec2 fragmentTexCoords;\n"
-		"uniform sampler2D basicTexture;\n"
-		"out vec4 finalColor;\n"
-		"void main()\n"
-		"{\n"
-		"    finalColor = texture(basicTexture, fragmentTexCoords);\n"
-		"}\0";
-
-	//stores index of the created memory allocation for the shaders.
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	//pass the allocated adress for created shader, count, source code adress.
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	//compiles the shader inside the OpenGL data structure.
-	glCompileShader(vertexShader);
-	int success;
-	char errorLog[1024];
-	//queery the error msg queue and prints the errors if compile isn't success.
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 1024, NULL, errorLog);
-		std::cout << "VertexShader compile error: \n" << errorLog << '\n';
-	}
-
-
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragmentShader, 1024, NULL, errorLog);
-		std::cout << "FragmentShader compile error: \n" << errorLog << '\n';
-	}
-
-	//creating a shader program and storing memory adress.
-	unsigned int shader = glCreateProgram();
-	//binding my shaders to the shader program.
-	glAttachShader(shader, vertexShader);
-	glAttachShader(shader, fragmentShader);
-	//linking shaders together.
-	glLinkProgram(shader);
-	glGetProgramiv(shader, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(shader, 1024, NULL, errorLog);
-		std::cout << "Shader linking error: \n" << errorLog << '\n';
-	}
-
-	//after linking the shaders, the exists inside the program so they can be deleted.
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return shader;
-}
 
 
 int main()
-{	
-	glm::vec3 playerPosition = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 playerEulers = { 0.0f, 90.0f, 0.0f };
+{		
+
+	//create playerinfo class.
+	PlayerCreateInfo playerInfo;
+	//pass data to playerinfo.
+	playerInfo.eulers = { 0.0f, 90.0f, 0.0f };
+	playerInfo.position = { 0.0f, 0.0f, 0.0f };
+	//create new player with the data from current playerinfo.
+	Player* player = new Player(&playerInfo);
+
+	CubeCreateInfo cubeInfo;
+	cubeInfo.eulers = { 0.0f, 0.0f, 0.0f };
+	cubeInfo.positions = { 3.0f, 0.0f, 0.5f };
+	Cube* cube = new Cube(&cubeInfo);
+
+
 	int width = 640;
 	int height = 480;
 	float aspectRatio = (float)width / (float)height;
@@ -234,7 +164,7 @@ int main()
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	
-	unsigned int shader = createShader();
+	unsigned int shader = util::loadShader("shaders/vertex.txt", "shaders/fragment.txt");
 	glUseProgram(shader);
 
 	//2d
@@ -347,8 +277,8 @@ int main()
 
 	//load image from project, get image details and set rgb+alpha.
 	int texWidth, texHeight, channelCount;
-	unsigned char* data = stbi_load("textures/wood.jpg", &texWidth, &texHeight, &channelCount, STBI_rgb_alpha);
-	unsigned int texture;
+	unsigned char* data = stbi_load("textures/smallWood.jpg", &texWidth, &texHeight, &channelCount, STBI_rgb_alpha);
+	unsigned int texture; 
 	//create and store texture as 2d.
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 	glTextureStorage2D(texture, 1, GL_RGBA8, texWidth, texHeight);
@@ -373,35 +303,34 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{	
-		//player forward vector
-		glm::vec3 forwards
-		{
-			glm::sin(glm::radians(playerEulers.y)) * glm::cos(glm::radians(playerEulers.z)),
-			glm::sin(glm::radians(playerEulers.y)) * glm::sin(glm::radians(playerEulers.z)),
-			glm::cos(glm::radians(playerEulers.y))
-		};
-
-		glm::vec3 globalUp{ 0.0f, 0.0f, 1.0 };
-		glm::vec3 right{ glm::cross(forwards, globalUp) };
-		glm::vec3 up{ glm::cross(right, forwards) };		
-		//update player camera view
-		glm::mat4 viewTransform{ glm::lookAt(playerPosition, playerPosition + forwards, up) };
-		glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(viewTransform));
-
-
 		//handles window input.
-		processInput(window, playerPosition, playerEulers, halfWidth, halfHeight);
-
+		processInput(window, player, halfWidth, halfHeight);
 		//flushes queue events.
 		glfwPollEvents();
+		
+		player->update();
+		cube->update(1.0f);
+		
+		//prepare shaders
+		glm::mat4 viewTransform { glm::lookAt(
+			player->position, 
+			player->position + player->forwards,
+			player->up) };
+		//set view in shader
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+			1, GL_FALSE, glm::value_ptr(viewTransform));		
 
 		//update transform
-		float angle = glm::radians(static_cast<float>(10 * glfwGetTime()));
-		glm::mat4 modelTransform = glm::mat4(1.0f);
-		modelTransform = glm::translate(modelTransform, { 3.0f, 0.0f, 0.0f });
-		//modelTransform = glm::rotate(modelTransform, angle, { 1.0f, 1.0f, 0.0f });
-		//modelTransform = glm::rotate(modelTransform, 1.0f * angle, { 0.0f, 1.0f, 0.0f });
-		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, false, glm::value_ptr(modelTransform));
+		glm::mat4 modelTransform = { glm::mat4(1.0f) };
+		modelTransform = glm::translate(modelTransform, cube->position);
+
+		modelTransform = modelTransform * glm::eulerAngleXYZ
+		(
+			cube->eulers.x, cube->eulers.y, cube->eulers.z
+		);		
+
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+			1, GL_FALSE, glm::value_ptr(modelTransform));
 
 
 		//draw		

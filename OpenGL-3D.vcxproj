@@ -139,13 +139,26 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="model\Cube.cpp" />
+    <ClCompile Include="model\player.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="view\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
+    <ClInclude Include="model\Cube.h" />
+    <ClInclude Include="model\player.h" />
+    <ClInclude Include="model\scene.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="view\shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\smallWood.jpg" />
     <Image Include="textures\wood.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\fragment.txt" />
+    <Text Include="shaders\vertex.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
