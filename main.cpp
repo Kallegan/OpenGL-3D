@@ -7,10 +7,101 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& playerEulers, int halfWidht, int halfHeight)
 {
+	int wasdState{ 0 };
+	float walkDirection{ playerEulers.z };
+	bool bWalking{ false };
+	float moveSpeed = 0.1f;
+	
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		wasdState += 1;
+	
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		wasdState += 2;
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)	
+		wasdState += 4;
+	
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)	
+		wasdState += 8;
+		
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+
+
+	switch (wasdState) 
+	{
+	case 1:
+	case 11:
+		//forwards
+		bWalking = true;
+		break;
+	case 3:
+		//left-forwards
+		bWalking = true;
+		walkDirection += 45;
+		break;
+	case 2:
+	case 7:
+		//left
+		bWalking = true;
+		walkDirection += 90;
+		break;
+	case 6:
+		//left-backwards
+		bWalking = true;
+		walkDirection += 135;
+		break;
+	case 4:
+	case 14:
+		//backwards
+		bWalking = true;
+		walkDirection += 180;
+		break;
+	case 12:
+		//right-backwards
+		bWalking = true;
+		walkDirection += 225;
+		break;
+	case 8:
+	case 13:
+		//right
+		bWalking = true;
+		walkDirection += 270;
+		break;
+	case 9:
+		//right-forwards
+		bWalking = true;
+		walkDirection += 315;
+	}
+
+	//player movement
+	if (bWalking)
+	{
+		playerPosition += moveSpeed * glm::vec3
+		{
+			glm::cos(glm::radians(walkDirection)),
+			glm::sin(glm::radians(walkDirection)),
+			0.0f
+		};
+	}
+
+	//mouse controller
+	double mouseX, mouseY;
+	float mouseSpeed = 0.1f;
+	//passing ref so cursorpos can be set from glfw function.
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+	glfwSetCursorPos(window, halfWidht, halfHeight);
+
+	//horizontal rotation
+	float deltaX{ static_cast<float>(mouseX - halfWidht) };
+	playerEulers.z -= deltaX * mouseSpeed;
+
+	//vertical rotation
+	float deltaY{ static_cast<float>(mouseY - halfHeight) };
+	//sets y rotation to clamp up / down based on look angle.
+	playerEulers.y = std::max(std::min(playerEulers.y + deltaY * mouseSpeed, 179.0f), 1.0f);
 }
 
 GLFWwindow* InitWindow(int width, int height)
@@ -51,7 +142,6 @@ unsigned int createShader()
 	/*  vertexPositions, 3d vector(x, y, z), coordiates of the vertesies.
 		gl_Positions, global 4d vector, gets passed vertexPositions. 4th vector(w) is perspective.
 		uniform mat4, XYZ + 1. Last dimension used for translations. 
-		transform our position to world cooardinates * projection to project the world around us.
 		x, 1.0 - y flips the texture.
 		 "\0" ends string.
 	*/
@@ -61,10 +151,11 @@ unsigned int createShader()
 		"layout (location = 1) in vec2 vertexTexCoords;\n"		
 		"layout (location = 0) out vec2 fragmentTexCoords;\n"
 		"uniform mat4 model;\n"
+		"uniform mat4 view;\n"
 		"uniform mat4 projection;\n"
 		"void main()\n"
 		"{\n"
-		"    gl_Position = projection * model * vec4(vertexPosition, 1.0);\n"
+		"    gl_Position = projection * view * model * vec4(vertexPosition, 1.0);\n"
 		"    fragmentTexCoords = vec2(vertexTexCoords.x, 1.0 - vertexTexCoords.y);\n"
 		"}\0";
 
@@ -128,6 +219,8 @@ unsigned int createShader()
 
 int main()
 {	
+	glm::vec3 playerPosition = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 playerEulers = { 0.0f, 90.0f, 0.0f };
 	int width = 640;
 	int height = 480;
 	float aspectRatio = (float)width / (float)height;
@@ -138,11 +231,13 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	
 	unsigned int shader = createShader();
 	glUseProgram(shader);
 
-	
+	//2d
 	/* vpos    color     texcoords S=horizontal, 0-1, 0 = left, 1 right. T=vertical, 0 bottom, 1 top.
 	X, Y, Z | R, G, B | S, T
 	0 = centered.
@@ -165,11 +260,9 @@ int main()
 	int stride = 8 * sizeof(float); //how many elements to get from one vertex to another in vector.
 	*/
 
-
-
-	//Make Cube
+	//CUBE//
 	//x,y,z,s,t
-	std::vector<float> vertices = { {
+	std::vector<float> vertices = {
 			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom
 			 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
 			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
@@ -217,7 +310,8 @@ int main()
 			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
 			-0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
 			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f
-	} };
+	};
+
 	int vertexCount = vertices.size() / 5;
 	int VBOSize = vertices.size() * sizeof(float); //how many bits to allocate in dynamic storage.
 	int stride = 5 * sizeof(float); //how many elements to get from one vertex to another in vector.
@@ -274,10 +368,29 @@ int main()
 	//4floatvector matrix,sends projection data to shader.
 	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projectionTransform));
 
+	int halfWidth = width / 2;
+	int halfHeight = height / 2;
+
 	while (!glfwWindowShouldClose(window))
 	{	
+		//player forward vector
+		glm::vec3 forwards
+		{
+			glm::sin(glm::radians(playerEulers.y)) * glm::cos(glm::radians(playerEulers.z)),
+			glm::sin(glm::radians(playerEulers.y)) * glm::sin(glm::radians(playerEulers.z)),
+			glm::cos(glm::radians(playerEulers.y))
+		};
+
+		glm::vec3 globalUp{ 0.0f, 0.0f, 1.0 };
+		glm::vec3 right{ glm::cross(forwards, globalUp) };
+		glm::vec3 up{ glm::cross(right, forwards) };		
+		//update player camera view
+		glm::mat4 viewTransform{ glm::lookAt(playerPosition, playerPosition + forwards, up) };
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(viewTransform));
+
+
 		//handles window input.
-		processInput(window);
+		processInput(window, playerPosition, playerEulers, halfWidth, halfHeight);
 
 		//flushes queue events.
 		glfwPollEvents();
@@ -285,9 +398,9 @@ int main()
 		//update transform
 		float angle = glm::radians(static_cast<float>(10 * glfwGetTime()));
 		glm::mat4 modelTransform = glm::mat4(1.0f);
-		modelTransform = glm::translate(modelTransform, { 0.0f, 0.0f, -3.0f });
-		modelTransform = glm::rotate(modelTransform, angle, { 1.0f, 1.0f, 0.0f });
-		modelTransform = glm::rotate(modelTransform, 1.0f * angle, { 0.0f, 1.0f, 0.0f });
+		modelTransform = glm::translate(modelTransform, { 3.0f, 0.0f, 0.0f });
+		//modelTransform = glm::rotate(modelTransform, angle, { 1.0f, 1.0f, 0.0f });
+		//modelTransform = glm::rotate(modelTransform, 1.0f * angle, { 0.0f, 1.0f, 0.0f });
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, false, glm::value_ptr(modelTransform));
 
 
