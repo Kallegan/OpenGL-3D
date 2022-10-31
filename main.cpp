@@ -277,7 +277,7 @@ int main()
 
 	//load image from project, get image details and set rgb+alpha.
 	int texWidth, texHeight, channelCount;
-	unsigned char* data = stbi_load("textures/smallWood.jpg", &texWidth, &texHeight, &channelCount, STBI_rgb_alpha);
+	unsigned char* data = stbi_load("textures/wood.jpg", &texWidth, &texHeight, &channelCount, STBI_rgb_alpha);
 	unsigned int texture; 
 	//create and store texture as 2d.
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
