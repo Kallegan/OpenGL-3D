@@ -45,6 +45,12 @@
     <ClCompile Include="view\material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="view\engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="control\game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -72,6 +78,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="view\material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view\engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
