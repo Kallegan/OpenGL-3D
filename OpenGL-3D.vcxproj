@@ -143,6 +143,7 @@
     <ClCompile Include="model\player.cpp" />
     <ClCompile Include="model\scene.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="view\RectangleModel.cpp" />
     <ClCompile Include="view\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,9 +152,11 @@
     <ClInclude Include="model\player.h" />
     <ClInclude Include="model\scene.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="view\RectangleModel.h" />
     <ClInclude Include="view\shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\cardboard.jpg" />
     <Image Include="textures\smallWood.jpg" />
     <Image Include="textures\wood.jpg" />
   </ItemGroup>

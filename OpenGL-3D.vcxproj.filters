@@ -36,6 +36,9 @@
     <ClCompile Include="model\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="view\RectangleModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -56,12 +59,18 @@
     <ClInclude Include="model\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="view\RectangleModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\wood.jpg">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="textures\smallWood.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\cardboard.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
