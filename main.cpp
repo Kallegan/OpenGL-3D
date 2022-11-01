@@ -76,7 +76,7 @@ void processInput(GLFWwindow* window, Scene* scene, int halfWidht, int halfHeigh
 	if (bWalking)
 	{
 		scene->movePlayer(
-		scene->player->position += moveSpeed * glm::vec3
+		moveSpeed * glm::vec3
 		{
 			glm::cos(glm::radians(walkDirection)),
 			glm::sin(glm::radians(walkDirection)),
@@ -97,7 +97,7 @@ void processInput(GLFWwindow* window, Scene* scene, int halfWidht, int halfHeigh
 	float deltaY{ static_cast<float>(mouseY - halfHeight) };
 	scene->spinPlayer(
 		{
-			0.0f, deltaY, -deltaX * mouseSpeed
+			0.0f, deltaY * mouseSpeed, - deltaX * mouseSpeed
 		}
 	);
 }
