@@ -141,6 +141,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model\Cube.cpp" />
     <ClCompile Include="model\player.cpp" />
+    <ClCompile Include="model\scene.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="view\shader.cpp" />
   </ItemGroup>

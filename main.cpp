@@ -1,12 +1,12 @@
 #include "config.h"
 #include "view/shader.h"
-#include "model/Cube.h"
-#include "model/player.h"
+#include "model/scene.h"
 
-void processInput(GLFWwindow* window, Player* player, int halfWidht, int halfHeight)
+
+void processInput(GLFWwindow* window, Scene* scene, int halfWidht, int halfHeight)
 {
 	int wasdState{ 0 };
-	float walkDirection{ player->eulers.z};
+	float walkDirection{ scene->player->eulers.z};
 	bool bWalking{ false };
 	float moveSpeed = 0.1f;
 	
@@ -75,12 +75,13 @@ void processInput(GLFWwindow* window, Player* player, int halfWidht, int halfHei
 	//player movement
 	if (bWalking)
 	{
-		player->position += moveSpeed * glm::vec3
+		scene->movePlayer(
+		moveSpeed * glm::vec3
 		{
 			glm::cos(glm::radians(walkDirection)),
 			glm::sin(glm::radians(walkDirection)),
 			0.0f
-		};
+		});
 	}
 
 	//mouse controller
@@ -92,12 +93,13 @@ void processInput(GLFWwindow* window, Player* player, int halfWidht, int halfHei
 
 	//horizontal rotation
 	float deltaX{ static_cast<float>(mouseX - halfWidht) };
-	player->eulers.z -= deltaX * mouseSpeed;
-
 	//vertical rotation
 	float deltaY{ static_cast<float>(mouseY - halfHeight) };
-	//sets y rotation to clamp up / down based on look angle.
-	player->eulers.y = std::max(std::min(player->eulers.y + deltaY * mouseSpeed, 179.0f), 1.0f);
+	scene->spinPlayer(
+		{
+			0.0f, deltaY * mouseSpeed, - deltaX * mouseSpeed
+		}
+	);
 }
 
 GLFWwindow* InitWindow(int width, int height)
@@ -135,21 +137,8 @@ GLFWwindow* InitWindow(int width, int height)
 
 
 int main()
-{		
-
-	//create playerinfo class.
-	PlayerCreateInfo playerInfo;
-	//pass data to playerinfo.
-	playerInfo.eulers = { 0.0f, 90.0f, 0.0f };
-	playerInfo.position = { 0.0f, 0.0f, 0.0f };
-	//create new player with the data from current playerinfo.
-	Player* player = new Player(&playerInfo);
-
-	CubeCreateInfo cubeInfo;
-	cubeInfo.eulers = { 0.0f, 0.0f, 0.0f };
-	cubeInfo.positions = { 3.0f, 0.0f, 0.5f };
-	Cube* cube = new Cube(&cubeInfo);
-
+{	
+	Scene* scene = new Scene();
 
 	int width = 640;
 	int height = 480;
@@ -304,35 +293,35 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{	
 		//handles window input.
-		processInput(window, player, halfWidth, halfHeight);
+		processInput(window, scene, halfWidth, halfHeight);
 		//flushes queue events.
 		glfwPollEvents();
+
+		scene->update(1.0f);
 		
-		player->update();
-		cube->update(1.0f);
+	
 		
 		//prepare shaders
 		glm::mat4 viewTransform { glm::lookAt(
-			player->position, 
-			player->position + player->forwards,
-			player->up) };
+			scene->player->position,
+			scene->player->position + scene->player->forwards,
+			scene->player->up) };
 		//set view in shader
 		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
 			1, GL_FALSE, glm::value_ptr(viewTransform));		
 
 		//update transform
 		glm::mat4 modelTransform = { glm::mat4(1.0f) };
-		modelTransform = glm::translate(modelTransform, cube->position);
+		modelTransform = glm::translate(modelTransform, scene->cube->position);
 
 		modelTransform = modelTransform * glm::eulerAngleXYZ
 		(
-			cube->eulers.x, cube->eulers.y, cube->eulers.z
+			scene->cube->eulers.x, scene->cube->eulers.y, scene->cube->eulers.z
 		);		
 
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
 			1, GL_FALSE, glm::value_ptr(modelTransform));
-
-
+		
 		//draw		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear buffer.
 		glUseProgram(shader); //setup shader program.
