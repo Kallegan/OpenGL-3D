@@ -36,7 +36,13 @@
     <ClCompile Include="model\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="view\RectangleModel.cpp">
+    <ClCompile Include="view\rectangleModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view\image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view\material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +65,13 @@
     <ClInclude Include="model\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="view\RectangleModel.h">
+    <ClInclude Include="view\rectangleModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view\image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view\material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

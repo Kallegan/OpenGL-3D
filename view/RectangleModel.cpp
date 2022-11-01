@@ -1,4 +1,4 @@
-#include "RectangleModel.h"
+#include "rectangleModel.h"
 
 
 RectangleModel::RectangleModel(RectangleModelCreateInfo* createInfo)

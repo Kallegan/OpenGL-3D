@@ -2,6 +2,7 @@
 #include "view/shader.h"
 #include "model/scene.h"
 #include "view/RectangleModel.h"
+#include "view/material.h"
 
 
 void processInput(GLFWwindow* window, Scene* scene, int halfWidht, int halfHeight)
@@ -156,30 +157,17 @@ int main()
 	
 	unsigned int shader = util::loadShader("shaders/vertex.txt", "shaders/fragment.txt");
 	glUseProgram(shader);
-
+	
 	RectangleModelCreateInfo cubeInfo;
 	cubeInfo.size = { 1.0f, 1.0f, 1.0f };
 	RectangleModel* cubeModel = new RectangleModel(&cubeInfo);
-
-
-
+		
 	//allocating texture 0 to the texture.
-	glUniform1i(glGetUniformLocation(shader, "basicTexture"),0);
+	glUniform1i(glGetUniformLocation(shader, "basicTexture"), 0);
 
-	//load image from project, get image details and set rgb+alpha.
-	int texWidth, texHeight, channelCount;
-	unsigned char* data = stbi_load("textures/cardboard.jpg", &texWidth, &texHeight, &channelCount, STBI_rgb_alpha);
-	unsigned int texture; 
-	//create and store texture as 2d.
-	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, 1, GL_RGBA8, texWidth, texHeight);
-	glTextureSubImage2D(texture, 0, 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT); //if out of bound, repeate texture.
-	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT); 
-	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); //if texture is far away, shrink using nearest.
-	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //if texture is far away, grow using linear.
-	stbi_image_free(data); //free the data after setting all up.
-
+	MaterialCreateInfo materialInfo;
+	materialInfo.filename = "textures/cardboard.jpg";
+	Material* cardboardMaterial = new Material(&materialInfo);
 
 	//setup frambuffer
 	glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //what color to clear screen with.
@@ -227,10 +215,8 @@ int main()
 		//draw		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear buffer.
 		glUseProgram(shader); //setup shader program.
-
+		cardboardMaterial->use();
 		//binds to texture unit declared above with loaded texture.
-		glBindTextureUnit(0, texture);
-
 		glBindVertexArray(cubeModel->VAO);
 		glDrawArrays(GL_TRIANGLES, 0, cubeModel->vertexCount);
 	
@@ -241,7 +227,7 @@ int main()
 	//free mem.
 	delete cubeModel;
 	delete scene;
-	glDeleteTextures(1, &texture);	
+	delete cardboardMaterial;
 	glDeleteProgram(shader);
 	glfwTerminate();	
 	return 0;	
