@@ -8,7 +8,7 @@ Scene::Scene()
 	PlayerCreateInfo playerInfo;
 	//pass data to playerinfo.
 	playerInfo.eulers = { 0.0f, 90.0f, 0.0f };
-	playerInfo.position = { 0.0f, 0.0f, 0.0f };
+	playerInfo.position = { 0.0f, 0.0f, 1.0f };
 	//create new player with the data from current playerinfo.
 	player = new Player(&playerInfo);
 
@@ -27,7 +27,7 @@ Scene::~Scene()
 void Scene::update(float rate)
 {
 	player->update();
-	cube->update(10.f);
+	cube->update(1.0f);
 }
 
 void Scene::movePlayer(glm::vec3 dPos)
@@ -41,7 +41,8 @@ void Scene::spinPlayer(glm::vec3 dEulers)
 
 	if (player->eulers.z < 0)
 		player->eulers.z += 360;
-	else if (player->eulers.z > 0)
+
+	else if (player->eulers.z > 360)
 		player->eulers.z -= -360;
 
 	//sets y rotation to clamp up / down based on look angle.

@@ -14,7 +14,7 @@ Engine::Engine(int widht, int height)
 	glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //what color to clear screen with.
 	glEnable(GL_DEPTH_TEST);
 	//setup perspective transform for the shader.
-	glm::mat4 projectionTransform = glm::perspective(45.0f, aspectRatio, 0.1f, 10.0f);
+	glm::mat4 projectionTransform = glm::perspective(45.f, aspectRatio, 0.1f, 10.0f);
 	//4floatvector matrix,sends projection data to shader.
 	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projectionTransform));
 
@@ -29,18 +29,19 @@ Engine::~Engine()
 	glDeleteProgram(shader);
 }
 
+void Engine::createModels()
+{
+	MeshCreateInfo cubeInfo;
+	cubeInfo.filename = "models/cube.obj";
+	cubeInfo.preTransform = 1.f * glm::mat4(1.0);
+	cubeModel = new ObjectMesh(&cubeInfo);
+}
+
 void Engine::createMaterials()
 {
 	MaterialCreateInfo materialInfo;
-	materialInfo.filename = "textures/cardboard.jpg";
+	materialInfo.filename = "textures/wood.jpg";
 	cardboardMaterial = new Material(&materialInfo);
-}
-
-void Engine::createModels()
-{
-	RectangleModelCreateInfo cubeInfo;
-	cubeInfo.size = { 1.0f, 1.0f, 1.0f };
-	cubeModel = new RectangleModel(&cubeInfo);
 }
 
 void Engine::render(Scene* scene)

@@ -3,6 +3,7 @@
 #include "../model/scene.h"
 #include "shader.h"
 #include "rectangleModel.h"
+#include "objectMesh.h"
 #include "material.h"
 
 class Engine
@@ -16,6 +17,6 @@ public:
 	void render(Scene* scene);
 
 	unsigned int shader;
-	Material* cardboardMaterial;
-	RectangleModel* cubeModel; 
+	Material* cardboardMaterial;	 
+	ObjectMesh* cubeModel;
 };

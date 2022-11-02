@@ -149,6 +149,7 @@
     <ClCompile Include="view\material.cpp" />
     <ClCompile Include="view\image.cpp" />
     <ClCompile Include="view\objectLoader.cpp" />
+    <ClCompile Include="view\objectMesh.cpp" />
     <ClCompile Include="view\rectangleModel.cpp" />
     <ClCompile Include="view\shader.cpp" />
   </ItemGroup>
@@ -164,6 +165,7 @@
     <ClInclude Include="view\material.h" />
     <ClInclude Include="view\image.h" />
     <ClInclude Include="view\objectLoader.h" />
+    <ClInclude Include="view\objectMesh.h" />
     <ClInclude Include="view\rectangleModel.h" />
     <ClInclude Include="view\shader.h" />
   </ItemGroup>
