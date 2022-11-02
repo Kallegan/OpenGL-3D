@@ -144,15 +144,18 @@
     <ClCompile Include="model\player.cpp" />
     <ClCompile Include="model\scene.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="view\engine.cpp" />
     <ClCompile Include="view\material.cpp" />
     <ClCompile Include="view\image.cpp" />
+    <ClCompile Include="view\objectLoader.cpp" />
     <ClCompile Include="view\rectangleModel.cpp" />
     <ClCompile Include="view\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="control\game.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="model\Cube.h" />
     <ClInclude Include="model\player.h" />
     <ClInclude Include="model\scene.h" />
@@ -160,6 +163,7 @@
     <ClInclude Include="view\engine.h" />
     <ClInclude Include="view\material.h" />
     <ClInclude Include="view\image.h" />
+    <ClInclude Include="view\objectLoader.h" />
     <ClInclude Include="view\rectangleModel.h" />
     <ClInclude Include="view\shader.h" />
   </ItemGroup>

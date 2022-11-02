@@ -51,6 +51,12 @@
     <ClCompile Include="control\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="view\objectLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tiny_obj_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -84,6 +90,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="control\game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view\objectLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
