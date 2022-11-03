@@ -6,6 +6,11 @@
 #include "objectMesh.h"
 #include "material.h"
 
+struct LightLocation
+{
+	unsigned int colorLoc, positionLoc, strengthLoc;
+};
+
 class Engine
 {
 public:
@@ -19,4 +24,6 @@ public:
 	unsigned int shader;
 	Material* cardboardMaterial;	 
 	ObjectMesh* cubeModel;
+	LightLocation lights;
+	unsigned int cameraPosLoc;
 };

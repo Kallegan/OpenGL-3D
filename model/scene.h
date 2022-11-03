@@ -2,6 +2,7 @@
 #include "../config.h"
 #include "cube.h"
 #include "player.h"
+#include "light.h"
 
 //scene has access to all objects, like ue levels. When we update objects, its done via scene.
 class Scene
@@ -15,4 +16,5 @@ public:
 
 	Cube* cube;
 	Player* player;
+	std::vector<Light*> lights;
 };

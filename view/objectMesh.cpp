@@ -7,7 +7,7 @@ ObjectMesh::ObjectMesh(MeshCreateInfo* createInfo)
 		createInfo->filename, 
 		createInfo->preTransform);
 
-	vertexCount = int(vertices.size()) / 5;
+	vertexCount = int(vertices.size()) / 8;
 	glCreateBuffers(1, &VBO);
 	glCreateVertexArrays(1, &VAO);
 	glVertexArrayVertexBuffer(VAO, 0, VBO, 0, 8 * sizeof(float));

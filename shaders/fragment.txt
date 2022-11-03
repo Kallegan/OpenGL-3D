@@ -1,12 +1,27 @@
 #version 450 core
 
+struct PointLight
+{
+    vec3 position;
+    vec3 color;
+    float strength;
+};
+
 in vec2 fragmentTexCoords;
+in vec3 fragmentPosition;
+in vec3 fragmentNormal;
 
 uniform sampler2D basicTexture;
+uniform PointLight light;
+uniform vec3 cameraPosition;
 
 out vec4 finalColor;
 
+vec3 calculatePointLight();
+
 void main()
-{
-    finalColor = texture(basicTexture, fragmentTexCoords);
+{    
+    vec3 temp = 0.2 * texture(basicTexture, fragmentTexCoords).rgb;
+    finalColor = vec4(temp, 1.0);
 }
+

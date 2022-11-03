@@ -11,12 +11,18 @@ Engine::Engine(int widht, int height)
 	float aspectRatio = (float)widht / (float)height;
 
 	//setup frambuffer
-	glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //what color to clear screen with.
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //what color to clear screen with.
 	glEnable(GL_DEPTH_TEST);
 	//setup perspective transform for the shader.
 	glm::mat4 projectionTransform = glm::perspective(45.f, aspectRatio, 0.1f, 10.0f);
 	//4floatvector matrix,sends projection data to shader.
 	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projectionTransform));
+
+	lights.colorLoc = glGetUniformLocation(shader, "light.color");
+	lights.positionLoc = glGetUniformLocation(shader, "light.position");
+	lights.strengthLoc = glGetUniformLocation(shader, "light.strength");
+
+	cameraPosLoc = glGetUniformLocation(shader, "cameraPosition");
 
 	createModels();
 	createMaterials();	
@@ -66,6 +72,14 @@ void Engine::render(Scene* scene)
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
 		1, GL_FALSE, glm::value_ptr(modelTransform));
+
+	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(scene->player->position));
+
+	Light* light = scene->lights[0];
+	glUniform3fv(lights.colorLoc, 1, glm::value_ptr(light->color));
+	glUniform3fv(lights.positionLoc, 1, glm::value_ptr(light->position));
+	glUniform1f(lights.strengthLoc, light->strength);
+
 
 	//draw		
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear buffer.

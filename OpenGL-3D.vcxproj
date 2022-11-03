@@ -141,6 +141,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model\Cube.cpp" />
+    <ClCompile Include="model\light.cpp" />
     <ClCompile Include="model\player.cpp" />
     <ClCompile Include="model\scene.cpp" />
     <ClCompile Include="stb_image.cpp" />
@@ -156,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="control\game.h" />
+    <ClInclude Include="model\light.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="model\Cube.h" />
     <ClInclude Include="model\player.h" />

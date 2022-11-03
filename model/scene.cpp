@@ -16,12 +16,21 @@ Scene::Scene()
 	cubeInfo.eulers = { 0.0f, 0.0f, 0.0f };
 	cubeInfo.positions = { 3.0f, 0.0f, 0.5f };
 	cube = new Cube(&cubeInfo);
+
+	LightCreateInfo lightInfo;
+	lightInfo.color = {1, 0, 0};
+	lightInfo.positions = {1, 0, 0};
+	lightInfo.strength = 4;	
+	lights.push_back(new Light(&lightInfo));
+
 }
 
 Scene::~Scene()
 {
 	delete cube;
 	delete player;
+	for(Light* light : lights)
+		delete light;
 }
 
 void Scene::update(float rate)
