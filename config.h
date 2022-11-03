@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
+#include <array>
 #include <glm/gtc/matrix_transform.hpp>
 #include "stb_image.h"
 #include "tiny_obj_loader.h"

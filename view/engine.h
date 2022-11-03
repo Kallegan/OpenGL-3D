@@ -8,7 +8,7 @@
 
 struct LightLocation
 {
-	unsigned int colorLoc, positionLoc, strengthLoc;
+	std::array<unsigned int,8> colorLoc, positionLoc, strengthLoc;
 };
 
 class Engine

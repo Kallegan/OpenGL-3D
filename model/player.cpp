@@ -19,4 +19,5 @@ void Player::update()
 	glm::vec3 globalUp{ 0.0f, 0.0f, 1.0 };
 	right = glm::cross(forwards, globalUp);
 	up = glm::cross(right, forwards);
+	viewTransform = glm::lookAt(position, position + forwards, up);
 }

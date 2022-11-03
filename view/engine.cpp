@@ -18,9 +18,23 @@ Engine::Engine(int widht, int height)
 	//4floatvector matrix,sends projection data to shader.
 	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projectionTransform));
 
-	lights.colorLoc = glGetUniformLocation(shader, "light.color");
-	lights.positionLoc = glGetUniformLocation(shader, "light.position");
-	lights.strengthLoc = glGetUniformLocation(shader, "light.strength");
+
+	std::stringstream location;
+	for (int i = 0; i < 8; i++)
+	{
+		location.str("");
+		location << "lights[" << i << "].color";
+		lights.colorLoc[i] = glGetUniformLocation(shader, location.str().c_str());
+
+		location.str("");
+		location << "lights[" << i << "].position";
+		lights.positionLoc[i] = glGetUniformLocation(shader, location.str().c_str());
+
+		location.str("");
+		location << "lights[" << i << "].strength";
+		lights.strengthLoc[i] = glGetUniformLocation(shader, location.str().c_str());
+	}
+	
 
 	cameraPosLoc = glGetUniformLocation(shader, "cameraPosition");
 
@@ -39,46 +53,40 @@ void Engine::createModels()
 {
 	MeshCreateInfo cubeInfo;
 	cubeInfo.filename = "models/cube.obj";
-	cubeInfo.preTransform = 1.f * glm::mat4(1.0);
+	cubeInfo.preTransform = 0.2f * glm::mat4(1.0);
 	cubeModel = new ObjectMesh(&cubeInfo);
 }
 
 void Engine::createMaterials()
 {
 	MaterialCreateInfo materialInfo;
-	materialInfo.filename = "textures/wood.jpg";
+	materialInfo.filename = "textures/cardboard.jpg";
 	cardboardMaterial = new Material(&materialInfo);
 }
 
 void Engine::render(Scene* scene)
 {
 	//prepare shaders
-	glm::mat4 viewTransform{ glm::lookAt(
-		scene->player->position,
-		scene->player->position + scene->player->forwards,
-		scene->player->up) };
-	//set view in shader
-	glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-		1, GL_FALSE, glm::value_ptr(viewTransform));
-
-	//update transform
-	glm::mat4 modelTransform = { glm::mat4(1.0f) };
-	modelTransform = glm::translate(modelTransform, scene->cube->position);
-
-	modelTransform = modelTransform * glm::eulerAngleXYZ
-	(
-		scene->cube->eulers.x, scene->cube->eulers.y, scene->cube->eulers.z
+	glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE,
+		glm::value_ptr(scene->player->viewTransform)
 	);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
-		1, GL_FALSE, glm::value_ptr(modelTransform));
+
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE,
+		glm::value_ptr(scene->cube->modelTransform)
+	);
 
 	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(scene->player->position));
 
-	Light* light = scene->lights[0];
-	glUniform3fv(lights.colorLoc, 1, glm::value_ptr(light->color));
-	glUniform3fv(lights.positionLoc, 1, glm::value_ptr(light->position));
-	glUniform1f(lights.strengthLoc, light->strength);
+	int i{ 0 };
+	for (Light* light : scene->lights)
+	{
+		glUniform3fv(lights.colorLoc[i], 1, glm::value_ptr(light->color));
+		glUniform3fv(lights.positionLoc[i], 1, glm::value_ptr(light->position));
+		glUniform1f(lights.strengthLoc[i], light->strength);
+		++i;
+	}
+	
 
 
 	//draw		
