@@ -104,8 +104,7 @@ returnCode Game::ProcessInput()
 		wasdState += 8;
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		return returnCode::QUIT;
-	
+		return returnCode::QUIT;		
 
 
 	switch (wasdState)

@@ -4,7 +4,7 @@ Material::Material(MaterialCreateInfo* createInfo)
 {
 	//load image from project, get image details and set rgb+alpha.
 	int texWidth, texHeight;
-	image material = util::loadFromFile(createInfo->filename);
+	material = util::loadFromFile(createInfo->filename);
 	unsigned char* data = material.pixels;
 	texWidth = material.width;
 	texHeight = material.height;	

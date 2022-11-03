@@ -11,6 +11,7 @@ class Material
 {
 public:
 	unsigned int texture;
+	image material;
 
 	Material(MaterialCreateInfo* createInfo); 
 	~Material();
